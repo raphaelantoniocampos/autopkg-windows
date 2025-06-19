@@ -397,7 +397,7 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
             text=True,
             stderr=subprocess.DEVNULL,
         ).lower()
-    except (FileNotFoundError, subprocess.CalledProcessError):
+    except (FileNotFoundError, subprocess.CalledProcessError, UnicodeDecodeError):
         console.print(
             "[yellow]Aviso: Não foi possível verificar pacotes instalados via Winget.[/yellow]"
         )
