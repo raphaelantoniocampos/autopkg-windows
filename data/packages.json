@@ -90,5 +90,16 @@
             "& ([ScriptBlock]::Create((irm https://get.activated.win)))",
             "/K-WindowsOffice"
         ]
+    },
+    {
+        "package_manager": "Custom",
+        "name": "Atualizar Todos",
+        "package_name": [
+            "powershell",
+            "winget",
+            "update",
+            "--all",
+            "--include-unknown"
+        ]
     }
 ]
