@@ -8,6 +8,7 @@ from time import sleep
 from typing import List, Union
 
 from InquirerPy import inquirer
+from InquirerPy.separator import Separator
 from rich.console import Console
 from rich.panel import Panel
 
@@ -100,6 +101,9 @@ class PackageManager:
                 check=False,
             )
         console.print(f"[green]{self.name} instalado com sucesso![/green]")
+
+    def __eq__(self, other):
+        return self.name == other.name
 
 
 class Package:
@@ -329,6 +333,13 @@ def interactive_mode():
         *[
             f"{'✅ ' if package.is_installed else ''}{package.name}"
             for package in PACKAGES
+            if package.package_manager is not CUSTOM
+        ],
+        Separator(),
+        *[
+            f"{'✅ ' if package.is_installed else ''}{package.name}"
+            for package in PACKAGES
+            if package.package_manager is CUSTOM
         ],
     ]
 
