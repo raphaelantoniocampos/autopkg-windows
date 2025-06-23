@@ -95,11 +95,12 @@
         "package_manager": "Custom",
         "name": "Atualizar Todos",
         "package_name": [
-            "powershell",
             "winget",
             "update",
             "--all",
-            "--include-unknown"
+            "--include-unknown",
+            "--accept-package-agreements",
+            "--accept-source-agreements"
         ]
     }
 ]
