@@ -38,12 +38,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install uv
-
+        
     - name: Bump version, commit, and tag
       id: bump_version
       run: |
-        $new_version = uv version --bump ${{ github.event.inputs.version_bump }}
-        echo "Nova versão: $new_version"
+        $full_output = uv version --bump ${{ github.event.inputs.version_bump }}
+        echo "Saída completa do uv: $full_output"
+
+        $new_version = ($full_output -split '=>')[-1].Trim()
+        echo "Versão extraída: $new_version"
 
         echo "NEW_VERSION=$new_version" >> $env:GITHUB_OUTPUT
 
@@ -51,7 +54,7 @@ jobs:
         git config --global user.email "actions@github.com"
         git add pyproject.toml
         git commit -m "Bump version to $new_version [skip ci]"
-        git tag -a v$new_version -m "Version $new_version"
+        git tag -a "v$new_version" -m "Version $new_version"
 
     - name: Push changes
       run: |
