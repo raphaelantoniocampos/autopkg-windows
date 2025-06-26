@@ -73,6 +73,6 @@ jobs:
 
           Triggered by: @${{ github.actor }}
           Reason: ${{ github.event.inputs.reason }}
-        dist/autopkg-windows.exe
+          dist/autopkg-windows.exe
         draft: false
         prerelease: false
