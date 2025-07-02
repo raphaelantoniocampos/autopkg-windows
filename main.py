@@ -317,7 +317,8 @@ def silent_mode():
     try:
         console.print("Instalando pacotes...")
         for package in PACKAGES:
-            package.install()
+            if not package.is_installed:
+                package.install()
 
     except Exception as e:
         console.print(f"Erro no modo silencioso: {str(e)}")
