@@ -344,21 +344,21 @@ def interactive_mode():
         ],
     ]
 
-    console.log(
+    console.print(
         Panel.fit(
             "[bold cyan]AutoPkg-Windows[/bold cyan] - [yellow]Ferramenta Automática de Pacotes Windows[/yellow]",
             subtitle="[green]github.com/raphaelantoniocampos/autopkg-windows[/green]",
         )
     )
 
-    console.log("")
-    console.log(
+    console.print("")
+    console.print(
         Panel.fit(
             f"✅ {installed} programas instalados\n",
             title="[bold]Status do Sistema[/bold]",
         )
     )
-    console.log("")
+    console.print("")
     selected_names = inquirer.checkbox(
         message="Selecione os programas que deseja instalar ou atualizar:",
         choices=choices,
