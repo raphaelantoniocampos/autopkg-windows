@@ -14,4 +14,5 @@ wheels/
 .ruff_cache
 
 temp.py
+autopkg.py
 data/silent-packages.json

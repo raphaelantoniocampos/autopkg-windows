@@ -39,7 +39,7 @@ if __name__ == "__main__":\n
         """)
 
     original_script = Path("./main.py")
-    temp_script = Path("./temp.py")
+    temp_script = Path("./autopkg.py")
     json_path = Path(json_path)
 
     with open(original_script, "r", encoding="utf-8") as original_f:
@@ -65,14 +65,14 @@ if __name__ == "__main__":\n
                     temp_f.write(line)
                     temp_f.write("\n")
 
-    subprocess.run(["uv", "run", "ruff", "check", "--fix", "temp.py"])
+    subprocess.run(["uv", "run", "ruff", "check", "--fix", "autopkg.py"])
     ico_path = (
         "icos/autopkg-windows-green.ico"
         if not silent
         else "icos/autopkg-windows-blue.ico"
     )
     name = "autopkg-windows" if not silent else "autopkg-windows-silent"
-    hide_console = "temp.py" if not hide_console else "--hide-console=hide-early"
+    hide_console = "autopkg.py" if not hide_console else "--hide-console=hide-early"
     subprocess.run(
         [
             "uv",
@@ -82,7 +82,7 @@ if __name__ == "__main__":\n
             f"--icon={ico_path}",
             f"-n={name}",
             hide_console,
-            "temp.py",
+            "autopkg.py",
         ]
     )
     temp_script.unlink()
