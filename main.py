@@ -78,7 +78,7 @@ class PackageManager:
 
     def install(self) -> None:
         """Installs the Package Manager using the powerShell script"""
-        console.print(f"[bold yellow]Instalando {self.name}...[/bold yellow]")
+        console.log(f"[bold yellow]Instalando {self.name}...[/bold yellow]")
         subprocess.run(
             [
                 "powershell",
@@ -100,7 +100,7 @@ class PackageManager:
                 shell=True,
                 check=False,
             )
-        console.print(f"[green]{self.name} instalado com sucesso![/green]")
+        console.log(f"[green]{self.name} instalado com sucesso![/green]")
 
     def __eq__(self, other):
         return self.name == other.name
@@ -151,15 +151,15 @@ class Package:
 
     def install(self) -> None:
         """Install the package using its package manager"""
-        console.print(f'[bold]Instalação/Comando "{self.name}" iniciado...[/bold]')
+        console.log(f'[bold]Instalação/Comando "{self.name}" iniciado...[/bold]')
         result = subprocess.run(
             self.cmd,
             shell=True,
         )
         if result.returncode != 0 and result.stderr is not None:
-            console.print(f"Return code{result.returncode}: {result.stderr}")
+            console.log(f"Return code{result.returncode}: {result.stderr}")
             return
-        console.print(f'[bold]Instalação/Comando "{self.name}" finalizado![/bold]')
+        console.log(f'[bold]Instalação/Comando "{self.name}" finalizado![/bold]')
 
 
 # --- Managers Instances ---
@@ -293,7 +293,7 @@ def get_missing_package_managers(
             not package.package_manager.is_installed()
             and not package.package_manager.name == "Custom"
         ):
-            console.print(
+            console.log(
                 f"O programa {package.name} necessita de [cyan]{
                     package.package_manager.name
                 }[/] para ser instalado."
@@ -315,13 +315,13 @@ def install_packages(selected_packages: List[Package]) -> None:
 def silent_mode():
     """Automated execution mode"""
     try:
-        console.print("Instalando pacotes...")
+        console.log("Instalando pacotes...")
         for package in PACKAGES:
             if not package.is_installed:
                 package.install()
 
     except Exception as e:
-        console.print(f"Erro no modo silencioso: {str(e)}")
+        console.log(f"Erro no modo silencioso: {str(e)}")
         return 1
 
     return 0
@@ -344,21 +344,21 @@ def interactive_mode():
         ],
     ]
 
-    console.print(
+    console.log(
         Panel.fit(
             "[bold cyan]AutoPkg-Windows[/bold cyan] - [yellow]Ferramenta Automática de Pacotes Windows[/yellow]",
             subtitle="[green]github.com/raphaelantoniocampos/autopkg-windows[/green]",
         )
     )
 
-    console.print("")
-    console.print(
+    console.log("")
+    console.log(
         Panel.fit(
             f"✅ {installed} programas instalados\n",
             title="[bold]Status do Sistema[/bold]",
         )
     )
-    console.print("")
+    console.log("")
     selected_names = inquirer.checkbox(
         message="Selecione os programas que deseja instalar ou atualizar:",
         choices=choices,
@@ -380,14 +380,14 @@ def interactive_mode():
             if package_managers_to_install:
                 for package_manager in package_managers_to_install:
                     package_manager.install()
-                    console.print("[yellow]Por favor, reinicie o programa.[/]")
+                    console.log("[yellow]Por favor, reinicie o programa.[/]")
                     input("\nPressione Enter para sair...")
                     return
             install_packages(selected_packages)
         else:
-            console.print("[bold yellow]Operação cancelada![/bold yellow]")
+            console.log("[bold yellow]Operação cancelada![/bold yellow]")
     else:
-        console.print("[bold yellow]Nenhum programa foi selecionado![/bold yellow]")
+        console.log("[bold yellow]Nenhum programa foi selecionado![/bold yellow]")
     input("\nPressione Enter para sair...")
     return 0
 
@@ -410,7 +410,7 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
             stderr=subprocess.DEVNULL,
         ).lower()
     except (FileNotFoundError, subprocess.CalledProcessError, UnicodeDecodeError):
-        console.print(
+        console.log(
             "[yellow]Aviso: Não foi possível verificar pacotes instalados via Winget.[/yellow]"
         )
         return packages
@@ -466,7 +466,7 @@ def main(json_path: str):
 
     except json.decoder.JSONDecodeError as err:
         sleep(1)
-        console.print(
+        console.log(
             f"\n[yellow]Arquivo JSON com erro.[/]\n{
                 err
             }\n\nLeia o [cyan]README.md[/] para mais informações."
@@ -474,7 +474,7 @@ def main(json_path: str):
         return 1
     except KeyboardInterrupt:
         sleep(1)
-        console.print("\n[yellow]Interrompido pelo usuário.[/]\n")
+        console.log("\n[yellow]Interrompido pelo usuário.[/]\n")
         input("\nPressione Enter para sair...")
         return 0
 
