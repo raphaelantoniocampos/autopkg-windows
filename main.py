@@ -1,9 +1,7 @@
 import argparse
-import ctypes
 import json
 import os
 import subprocess
-import sys
 from time import sleep
 from typing import List, Union
 
@@ -204,85 +202,6 @@ CUSTOM = PackageManager(
 # --- Functions ---
 
 
-def is_run_as_admin() -> bool:
-    """Verify if the script is being runned as admin."""
-    try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
-    except Exception:
-        return False
-
-
-def elevate_as_admin() -> None:
-    """Asks privilege elevation"""
-    if not is_run_as_admin():
-        ctypes.windll.shell32.ShellExecuteW(
-            None, "runas", sys.executable, " ".join(sys.argv), None, 1
-        )
-        sys.exit()
-
-
-def check_domain_user() -> bool:
-    """Verify if script is being runned by domain user"""
-    username = os.getenv("USERNAME", "")
-    return "@" in username or "\\" in username
-
-
-def ensure_admin_rights() -> bool:
-    """Ensures that the script has admin rights"""
-    if is_run_as_admin():
-        return True
-
-    params = {
-        "lpVerb": "runas",
-        "lpFile": sys.executable,
-        "lpParameters": " ".join(sys.argv),
-        "lpDirectory": os.path.dirname(sys.executable),
-        "nShow": 1,  # SW_SHOWNORMAL
-    }
-
-    if check_domain_user():
-        from ctypes import wintypes
-
-        params["nShow"] = 5
-        params["fMask"] = 0x00000040
-
-        class SHELLEXECUTEINFOW(ctypes.Structure):
-            _fields_ = [
-                ("cbSize", wintypes.DWORD),
-                ("fMask", wintypes.ULONG),
-                ("hwnd", wintypes.HWND),
-                ("lpVerb", wintypes.LPCWSTR),
-                ("lpFile", wintypes.LPCWSTR),
-                ("lpParameters", wintypes.LPCWSTR),
-                ("lpDirectory", wintypes.LPCWSTR),
-                ("nShow", ctypes.c_int),
-                ("hInstApp", wintypes.HINSTANCE),
-                ("lpIDList", ctypes.c_void_p),
-                ("lpClass", wintypes.LPCWSTR),
-                ("hKeyClass", wintypes.HKEY),
-                ("dwHotKey", wintypes.DWORD),
-                ("hMonitor", wintypes.HANDLE),
-                ("hProcess", wintypes.HANDLE),
-            ]
-
-        sei = SHELLEXECUTEINFOW()
-        sei.cbSize = ctypes.sizeof(sei)
-        sei.lpVerb = "runas"
-        sei.lpFile = sys.executable
-        sei.lpParameters = " ".join(sys.argv)
-        sei.nShow = 5
-
-        if not ctypes.windll.shell32.ShellExecuteExW(ctypes.byref(sei)):
-            raise ctypes.WinError()
-
-        sys.exit(0)
-    else:
-        ctypes.windll.shell32.ShellExecuteW(
-            None, "runas", sys.executable, " ".join(sys.argv), None, 1
-        )
-        sys.exit(0)
-
-
 def get_missing_package_managers(
     selected_packages: List[Package],
 ) -> List[PackageManager]:
@@ -453,7 +372,6 @@ def main(json_path: str):
     os.chdir(os.path.expanduser("~"))
     global PACKAGES
 
-    ensure_admin_rights()
     try:
         verify_winget()
         packages = load_packages_from_json(json_path)
