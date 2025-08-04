@@ -5,12 +5,28 @@ import subprocess
 from time import sleep
 from typing import List, Union
 
+import tomllib
 from InquirerPy import inquirer
 from InquirerPy.separator import Separator
 from rich.console import Console
 from rich.panel import Panel
 
 import builder
+
+
+def get_project_version() -> str:
+    """Reads and returns the project version from the pyproject.toml file."""
+    try:
+        with open("pyproject.toml", "rb") as f:
+            data = tomllib.load(f)
+        return data["project"]["version"]
+    except FileNotFoundError:
+        return "unknown"
+    except KeyError:
+        return "unknown"
+
+
+PROJECT_VERSION = get_project_version()
 
 INQUIRER_KEYBINDINGS = {
     "answer": [
@@ -284,7 +300,9 @@ def interactive_mode():
         keybindings=INQUIRER_KEYBINDINGS,
         mandatory=False,
         instruction="Use as teclas de direção para navegar",
-        long_instruction="[Espaço] seleciona • [Enter] confirma • [Esc] cancela\nMIT License • © 2025 Raphael Campos",
+        long_instruction=f"[Espaço] seleciona • [Enter] confirma • [Esc] cancela\n{
+            PROJECT_VERSION
+        } • MIT License • © 2025 Raphael Campos",
     ).execute()
 
     if selected_names:
@@ -391,7 +409,7 @@ def main(json_path: str):
         )
         return 1
     except KeyboardInterrupt:
-        sleep(1)
+        sleep(0.1)
         console.log("\n[yellow]Interrompido pelo usuário.[/]\n")
         input("\nPressione Enter para sair...")
         return 0

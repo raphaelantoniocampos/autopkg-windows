@@ -1,6 +1,22 @@
 import json
 import subprocess
 from pathlib import Path
+import tomllib
+
+
+def get_project_version() -> str:
+    """Reads and returns the project version from the pyproject.toml file."""
+    try:
+        with open("pyproject.toml", "rb") as f:
+            data = tomllib.load(f)
+        return data["project"]["version"]
+    except FileNotFoundError:
+        return "unknown"
+    except KeyError:
+        return "unknown"
+
+
+PROJECT_VERSION = get_project_version()
 
 
 def build(json_path: str, silent: bool, hide_console: bool = False):
@@ -38,6 +54,11 @@ if __name__ == "__main__":\n
     main()
         """)
 
+    def rewrite_get_project_version(temp_f):
+        temp_f.write(f"""
+PROJECT_VERSION = "{PROJECT_VERSION}"
+""")
+
     original_script = Path("./main.py")
     temp_script = Path("./autopkg.py")
     json_path = Path(json_path)
@@ -49,6 +70,13 @@ if __name__ == "__main__":\n
             for line in original_lines:
                 if "import builder" in line:
                     temp_f.write("# ")
+
+                if line.startswith("def get_project_version() -> str:"):
+                    rewrite_get_project_version(temp_f)
+                    ignore = True
+
+                if line.startswith("INQUIRER_KEYBINDINGS = {"):
+                    ignore = False
 
                 if line.startswith("def load"):
                     rewrite_load_json(json_path, temp_f)
