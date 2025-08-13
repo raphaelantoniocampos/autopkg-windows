@@ -110,7 +110,7 @@ class PackageManager:
         # Also update sources if package manager is winget
         if self.name == "Winget":
             subprocess.run(
-                ["winget", "source", "update--force"],
+                ["winget", "source", "update", "--force"],
                 shell=True,
                 check=False,
             )
