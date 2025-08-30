@@ -1,7 +1,7 @@
-import argparse
 import json
 import os
 import subprocess
+from sys import argv, exit
 from time import sleep
 from typing import List, Union
 
@@ -13,20 +13,12 @@ from rich.panel import Panel
 
 import builder
 
+USAGE = """AutoPkg-Windows
+Usage: uv run main.py --options json_path
+Options:
+-b, --build: Build the executable
+-s, --silent: Use silent mode"""
 
-def get_project_version() -> str:
-    """Reads and returns the project version from the pyproject.toml file."""
-    try:
-        with open("pyproject.toml", "rb") as f:
-            data = tomllib.load(f)
-        return data["project"]["version"]
-    except FileNotFoundError:
-        return "unknown"
-    except KeyError:
-        return "unknown"
-
-
-PROJECT_VERSION = get_project_version()
 
 INQUIRER_KEYBINDINGS = {
     "answer": [
@@ -51,6 +43,37 @@ INQUIRER_KEYBINDINGS = {
         {"key": "a"},
     ],
 }
+
+
+def main(json_path: str, silent: bool):
+    """Main function"""
+    os.chdir(os.path.expanduser("~"))
+    global PACKAGES
+
+    try:
+        verify_winget()
+        packages = load_packages_from_json(json_path)
+        PACKAGES = check_installed_packages(packages)
+
+        if silent:
+            silent_mode()
+        else:
+            interactive_mode()
+
+    except json.decoder.JSONDecodeError as err:
+        sleep(1)
+        console.log(
+            f"\n[yellow]Arquivo JSON com erro.[/]\n{
+                err
+            }\n\nLeia o [cyan]README.md[/] para mais informações."
+        )
+        return 1
+    except KeyboardInterrupt:
+        sleep(0.1)
+        console.log("\n[yellow]Interrompido pelo usuário.[/]\n")
+        input("\nPressione Enter para sair...")
+        return 0
+
 
 # --- Classes ---
 
@@ -218,6 +241,18 @@ CUSTOM = PackageManager(
 # --- Functions ---
 
 
+def get_project_version() -> str:
+    """Reads and returns the project version from the pyproject.toml file."""
+    try:
+        with open("pyproject.toml", "rb") as f:
+            data = tomllib.load(f)
+        return data["project"]["version"]
+    except FileNotFoundError:
+        return "unknown"
+    except KeyError:
+        return "unknown"
+
+
 def get_missing_package_managers(
     selected_packages: List[Package],
 ) -> List[PackageManager]:
@@ -278,6 +313,7 @@ def interactive_mode():
             if package.package_manager is CUSTOM
         ],
     ]
+    project_version = get_project_version()
 
     console.print(
         Panel.fit(
@@ -301,7 +337,7 @@ def interactive_mode():
         mandatory=False,
         instruction="Use as teclas de direção para navegar",
         long_instruction=f"[Espaço] seleciona • [Enter] confirma • [Esc] cancela\n{
-            PROJECT_VERSION
+            project_version
         } • MIT License • © 2025 Raphael Campos",
     ).execute()
 
@@ -385,60 +421,65 @@ def load_packages_from_json(json_path: str) -> List[Package]:
     return packages
 
 
-def main(json_path: str):
-    """Main function"""
-    os.chdir(os.path.expanduser("~"))
-    global PACKAGES
-
-    try:
-        verify_winget()
-        packages = load_packages_from_json(json_path)
-        PACKAGES = check_installed_packages(packages)
-
-        if ARGS.silent:
-            silent_mode()
-        else:
-            interactive_mode()
-
-    except json.decoder.JSONDecodeError as err:
-        sleep(1)
-        console.log(
-            f"\n[yellow]Arquivo JSON com erro.[/]\n{
-                err
-            }\n\nLeia o [cyan]README.md[/] para mais informações."
-        )
-        return 1
-    except KeyboardInterrupt:
-        sleep(0.1)
-        console.log("\n[yellow]Interrompido pelo usuário.[/]\n")
-        input("\nPressione Enter para sair...")
-        return 0
+def match_option(arg: str, options: List[str]):
+    match arg:
+        case "-b":
+            options += ["build"]
+        case "--build":
+            options += ["build"]
+        case "-s":
+            options += ["silent"]
+        case "--silent":
+            options += ["silent"]
+    if len(options) == 2:
+        if options[0] == options[1]:
+            print(USAGE)
+            exit(1)
+    return options
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="AutoPkg-Windows")
-    parser.add_argument(
-        "json_path",
-        type=str,
-        help="Caminho para o arquivo JSON contendo a lista de aplicativos.",
-    )
-    parser.add_argument(
-        "--silent",
-        action="store_true",
-        help="Executar em modo silencioso sem interface",
-    )
-    parser.add_argument(
-        "--build",
-        action="store_true",
-        help="Gerar executável",
-    )
-    ARGS: argparse.Namespace = parser.parse_args()
+    options = []
+    json_path = ""
+    match len(argv):
+        case 1:
+            print(USAGE)
+            exit(1)
+        case 2:
+            options = match_option(argv[1], options)
+            if options:
+                print(USAGE)
+                exit(1)
+            json_path = os.path.abspath(argv[1])
+        case 3:
+            options = match_option(argv[1], options)
+            if not options:
+                print(USAGE)
+                exit(1)
+            json_path = os.path.abspath(argv[2])
+        case 4:
+            options = match_option(argv[1], options)
+            if not options:
+                print(USAGE)
+                exit(1)
+            options = match_option(argv[2], options)
+            if len(options) != 2:
+                print(USAGE)
+                exit(1)
+            json_path = os.path.abspath(argv[3])
+        case _:
+            print(USAGE)
+            exit(1)
 
-    json_path = os.path.abspath(ARGS.json_path)
-    if ARGS.build:
-        builder.build(json_path=json_path, silent=ARGS.silent)
+    if json_path[-4:] != "json":
+        print(USAGE)
+        exit(1)
+
+    silent = "silent" in options
+    if "build" in options:
+        builder.build(json_path=json_path, silent=silent)
         exit(0)
 
     console = Console()
-    exit_code = main(json_path)
+    exit_code = main(json_path=json_path, silent=silent)
     exit(exit_code)
