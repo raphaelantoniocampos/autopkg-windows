@@ -42,12 +42,9 @@ def build(json_path: str, silent: bool, hide_console: bool = False):
         temp_f.write("    json_path = None\n")
 
     def rewrite_if_name_main(temp_f):
-        temp_f.write("class Args:\n")
         temp_f.write(f"""
     silent = {str(silent)}
     build = False
-
-ARGS = Args()\n
     """)
         temp_f.write("""
 if __name__ == "__main__":\n

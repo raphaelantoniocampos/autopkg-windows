@@ -476,7 +476,8 @@ if __name__ == "__main__":
         exit(1)
 
     silent = "silent" in options
-    if "build" in options:
+    build = "build" in options
+    if build:
         builder.build(json_path=json_path, silent=silent)
         exit(0)
 
