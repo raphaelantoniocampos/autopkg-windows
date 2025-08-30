@@ -87,7 +87,8 @@ uv run .\main.py .\data\packages.json
 - If you want to run the script in silent mode use *--silent*. (Runs installations without user interaction):
 
 ```
-uv run .\main.py .\data\packages.json --silent
+uv run .\main.py -s .\data\packages.json
+uv run .\main.py --silent .\data\packages.json
 ```
 
 ---
@@ -97,7 +98,8 @@ uv run .\main.py .\data\packages.json --silent
 - To create a standalone executable, use the build flag:
 
 ```
-uv run .\main.py .\data\packages.json --build
+uv run .\main.py -b .\data\packages.json
+uv run .\main.py --build .\data\packages.json
 ```
 
 - The generated executable will be located in dist/autopkg-windows.exe. 
@@ -105,7 +107,8 @@ uv run .\main.py .\data\packages.json --build
 - Also supports silent mode
 
 ```
-uv run .\main.py .\data\packages.json --silent --build
+uv run .\main.py -s -b .\data\packages.json
+uv run .\main.py --silent --build .\data\packages.json
 ```
 
 ---

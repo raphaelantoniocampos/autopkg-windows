@@ -14,7 +14,7 @@ from rich.panel import Panel
 import builder
 
 USAGE = """AutoPkg-Windows
-Usage: uv run main.py --options json_path
+Usage: uv run main.py [OPTIONS] json_path
 Options:
 -b, --build: Build the executable
 -s, --silent: Use silent mode"""
