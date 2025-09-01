@@ -5,58 +5,58 @@ from pathlib import Path
 import tomllib
 
 
+PYPROJECT_PATH = Path.cwd() / Path("pyproject.toml").absolute()
+
+
 def get_project_version() -> str:
     """Reads and returns the project version from the pyproject.toml file."""
     try:
-        with open("pyproject.toml", "rb") as f:
+        with open(PYPROJECT_PATH, "rb") as f:
             data = tomllib.load(f)
         return data["project"]["version"]
     except FileNotFoundError:
-        return "unknown"
+        return "filenotfound"
     except KeyError:
-        return "unknown"
+        return "keyerror"
 
 
 PROJECT_VERSION = get_project_version()
 
 
-def build(json_path: str, silent: bool, hide_console: bool = False):
-    def rewrite_load_json(json_path, temp_f):
-        with open(json_path, "r", encoding="utf-8") as file:
-            packages_data = json.load(file)
-            packages_list = """
+def rewrite_load_json(json_path, temp_f):
+    with open(json_path, "r", encoding="utf-8") as file:
+        packages_data = json.load(file)
+        packages_list = """
     PACKAGES = [
 """
-            for package in packages_data:
-                packages_list += f'        Package(name="{
-                    package["name"]
-                }", package_name={package["package_name"]}, package_manager="{
-                    package["package_manager"]
-                }"),\n'
-            packages_list += "    ]\n"
+        for package in packages_data:
+            packages_list += f'        Package(name="{package["name"]}", package_name={
+                package["package_name"]
+            }, package_manager="{package["package_manager"]}"),\n'
+        packages_list += "    ]\n"
 
-        temp_f.write("def load_packages_from_json(json_path):")
-        temp_f.write(packages_list)
-        temp_f.write("\n    return PACKAGES\n\n")
-        temp_f.write("def main():\n")
-        temp_f.write("    json_path = None\n")
+    temp_f.write("def load_packages_from_json(json_path):")
+    temp_f.write(packages_list)
+    temp_f.write("\n    return PACKAGES\n\n")
 
-    def rewrite_if_name_main(temp_f):
-        temp_f.write(f"""
+
+def rewrite_if_name_main(temp_f, silent):
+    temp_f.write(f"""
+if __name__ == "__main__":
     silent = {str(silent)}
-    build = False
-    """)
-        temp_f.write("""
-if __name__ == "__main__":\n
     console = Console()
-    main()
-        """)
-
-    def rewrite_get_project_version(temp_f):
-        temp_f.write(f"""
-PROJECT_VERSION = "{PROJECT_VERSION}"
+    main("", silent)
 """)
 
+
+def rewrite_get_project_version(temp_f):
+    temp_f.write(f"""
+def get_project_version() -> str:
+    return "{PROJECT_VERSION}"
+""")
+
+
+def build_exe(json_path: str, silent: bool, hide_console: bool = False):
     original_script = Path("./main.py")
     temp_script = Path("./autopkg.py")
     json_path = Path(json_path)
@@ -65,7 +65,15 @@ PROJECT_VERSION = "{PROJECT_VERSION}"
         original_lines = original_f.read().split("\n")
         with open(temp_script, "w", encoding="utf-8") as temp_f:
             ignore = False
+            blank_lines = 0
             for line in original_lines:
+                if line == "":
+                    blank_lines += 1
+
+                if blank_lines >= 2:
+                    ignore = False
+                    blank_lines = 0
+
                 if "import builder" in line:
                     temp_f.write("# ")
 
@@ -73,19 +81,13 @@ PROJECT_VERSION = "{PROJECT_VERSION}"
                     rewrite_get_project_version(temp_f)
                     ignore = True
 
-                if line.startswith("INQUIRER_KEYBINDINGS = {"):
-                    ignore = False
-
-                if line.startswith("def load"):
+                if line.startswith("def load_packages_from_json"):
                     rewrite_load_json(json_path, temp_f)
                     ignore = True
 
-                if '    """Main function"""' in line:
-                    ignore = False
-
                 if line.startswith('if __name__ == "__main__":'):
-                    rewrite_if_name_main(temp_f)
-                    ignore = True
+                    rewrite_if_name_main(temp_f=temp_f, silent=silent)
+                    break
 
                 if not ignore:
                     temp_f.write(line)

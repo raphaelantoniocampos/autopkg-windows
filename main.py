@@ -5,13 +5,14 @@ from sys import argv, exit
 from time import sleep
 from typing import List, Union
 
-import tomllib
 from InquirerPy import inquirer
 from InquirerPy.separator import Separator
 from rich.console import Console
 from rich.panel import Panel
 
-import builder
+from builder import build_exe, get_project_version
+
+project_version = get_project_version()
 
 USAGE = """AutoPkg-Windows
 Usage: uv run main.py [OPTIONS] json_path
@@ -49,17 +50,14 @@ def main(json_path: str, silent: bool):
     """Main function"""
     os.chdir(os.path.expanduser("~"))
     global PACKAGES
-
     try:
         verify_winget()
         packages = load_packages_from_json(json_path)
         PACKAGES = check_installed_packages(packages)
-
         if silent:
             silent_mode()
         else:
             interactive_mode()
-
     except json.decoder.JSONDecodeError as err:
         sleep(1)
         console.log(
@@ -241,18 +239,6 @@ CUSTOM = PackageManager(
 # --- Functions ---
 
 
-def get_project_version() -> str:
-    """Reads and returns the project version from the pyproject.toml file."""
-    try:
-        with open("pyproject.toml", "rb") as f:
-            data = tomllib.load(f)
-        return data["project"]["version"]
-    except FileNotFoundError:
-        return "unknown"
-    except KeyError:
-        return "unknown"
-
-
 def get_missing_package_managers(
     selected_packages: List[Package],
 ) -> List[PackageManager]:
@@ -313,7 +299,6 @@ def interactive_mode():
             if package.package_manager is CUSTOM
         ],
     ]
-    project_version = get_project_version()
 
     console.print(
         Panel.fit(
@@ -403,21 +388,17 @@ def verify_winget() -> None:
 def load_packages_from_json(json_path: str) -> List[Package]:
     """
     Load packages from a JSON file.
-
     Args:
         json_path (str): Path to the JSON file.
-
     Returns:
         list: A list of Package objects.
     """
     with open(json_path, "r") as file:
         packages_data = json.load(file)
-
     packages = []
     for package_data in packages_data:
         package = Package(**package_data)
         packages += [package]
-
     return packages
 
 
@@ -478,7 +459,7 @@ if __name__ == "__main__":
     silent = "silent" in options
     build = "build" in options
     if build:
-        builder.build(json_path=json_path, silent=silent)
+        build_exe(json_path=json_path, silent=silent)
         exit(0)
 
     console = Console()
