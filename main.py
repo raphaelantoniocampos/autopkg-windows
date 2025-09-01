@@ -1,10 +1,12 @@
 import json
 import os
 import subprocess
+import re
 from sys import argv, exit
 from time import sleep
 from typing import List, Union
 
+import pandas as pd
 from InquirerPy import inquirer
 from InquirerPy.separator import Separator
 from rich.console import Console
@@ -101,8 +103,6 @@ class PackageManager:
         try:
             result = subprocess.run(
                 f"{self.cli_install[0]} --version",
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
                 shell=True,
                 check=False,
             )
@@ -227,7 +227,7 @@ WINGET = PackageManager(
         "--scope",
         "machine",
     ],
-    script="&([ScriptBlock]::Create((irm asheroto.com/winget))) -Force",
+    script="Install-Script winget-install -Force",
 )
 
 CUSTOM = PackageManager(
@@ -353,29 +353,61 @@ def interactive_mode():
 def check_installed_packages(packages: List[Package]) -> List[Package]:
     """Updates installed packages list"""
 
-    def check_package(package: Package, installed_packages: str) -> bool:
-        """Searchs package name at installed packages str"""
+    def check_package(package: Package, df) -> bool:
+        """Verifica se o pacote já está instalado (busca por Nome ou ID no DataFrame)."""
         if package.package_manager == CUSTOM:
             return False
-        if package.package_name[0].lower() in installed_packages:
-            return True
+
+        for alias in package.package_name:
+            target = alias.lower()
+
+            if (
+                df["Nome"].str.lower().str.contains(target, na=False)
+                | df["ID"].str.lower().str.contains(target, na=False)
+            ).any():
+                return True
+
         return False
 
     try:
-        installed_packages = subprocess.check_output(
+        output = subprocess.check_output(
             ["winget", "list", "--accept-source-agreements"],
             text=True,
             stderr=subprocess.DEVNULL,
-        ).lower()
+        )
     except (FileNotFoundError, subprocess.CalledProcessError, UnicodeDecodeError):
         console.log(
             "[yellow]Aviso: Não foi possível verificar pacotes instalados via Winget.[/yellow]"
         )
         return packages
+    else:
+        lines = output.splitlines()
+        header_index = next(i for i, l in enumerate(lines) if "Nome" in l and "ID" in l)
+        data_lines = lines[header_index + 2 :]
 
-    for package in packages:
-        package.is_installed = check_package(package, installed_packages)
-    return packages
+        rows = []
+        for line in data_lines:
+            if not line.strip():
+                continue
+
+            parts = re.split(r"\s{2,}", line.strip())
+
+            if len(parts) > 5:
+                parts = [" ".join(parts[: len(parts) - 4])] + parts[-4:]
+
+            while len(parts) < 5:
+                parts += [""]
+
+            rows += [parts]
+
+        df = pd.DataFrame(
+            rows, columns=["Nome", "ID", "Versão", "Disponível", "Origem"]
+        )
+        df = df.map(lambda x: x.replace("â€¦", "") if isinstance(x, str) else x)
+
+        for package in packages:
+            package.is_installed = check_package(package, df)
+        return packages
 
 
 def verify_winget() -> None:

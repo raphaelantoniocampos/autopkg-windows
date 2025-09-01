@@ -1,11 +1,12 @@
 [project]
 name = "autopkg-windows"
-version = "1.1.0"
+version = "1.1.1"
 description = "Automated Windows Package Tool"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "inquirerpy>=0.3.4",
+    "pandas>=2.3.2",
     "pyproject-toml>=0.1.0",
     "rich>=13.9.4",
 ]

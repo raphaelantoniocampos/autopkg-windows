@@ -40,8 +40,6 @@
         "package_name": [
             "--Force",
             "Oracle.JavaRuntimeEnvironment",
-            "--version",
-            "8.0.4610.11",
             "-a",
             "x86"
         ]
