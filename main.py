@@ -268,7 +268,7 @@ def get_missing_package_managers(
                     package.package_manager.name
                 }[/] para ser instalado."
             )
-            package_managers.append(package.package_manager)
+            package_managers += [package.package_manager]
     return package_managers
 
 
@@ -416,7 +416,7 @@ def load_packages_from_json(json_path: str) -> List[Package]:
     packages = []
     for package_data in packages_data:
         package = Package(**package_data)
-        packages.append(package)
+        packages += [package]
 
     return packages
 

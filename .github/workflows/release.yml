@@ -7,15 +7,6 @@ on:
         description: 'Reason for manual trigger'
         required: true
         default: 'Manual build'
-      version_bump:
-        description: 'The part of the version to bump'
-        required: true
-        type: choice
-        options:
-        - patch
-        - minor
-        - major
-        default: 'patch'
 
 permissions:
   contents: write
@@ -39,28 +30,6 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install uv
         
-    - name: Bump version, commit, and tag
-      id: bump_version
-      run: |
-        $full_output = uv version --bump ${{ github.event.inputs.version_bump }}
-        echo "Saída completa do uv: $full_output"
-
-        $new_version = ($full_output -split '=>')[-1].Trim()
-        echo "Versão extraída: $new_version"
-
-        echo "NEW_VERSION=$new_version" >> $env:GITHUB_OUTPUT
-
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git add pyproject.toml
-        git commit -m "Bump version to $new_version [skip ci]"
-        git tag -a "v$new_version" -m "Version $new_version"
-
-    - name: Push changes
-      run: |
-        git push origin v${{ steps.bump_version.outputs.NEW_VERSION }}
-        git push
-
     - name: Install dependencies and Build executable
       run: |
         uv sync
