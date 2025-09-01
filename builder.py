@@ -49,10 +49,9 @@ if __name__ == "__main__":
 """)
 
 
-def rewrite_get_project_version(temp_f):
+def rewrite_project_version(temp_f):
     temp_f.write(f"""
-def get_project_version() -> str:
-    return "{PROJECT_VERSION}"
+project_version = "{PROJECT_VERSION}"
 """)
 
 
@@ -74,11 +73,11 @@ def build_exe(json_path: str, silent: bool, hide_console: bool = False):
                     ignore = False
                     blank_lines = 0
 
-                if "import builder" in line:
+                if line.startswith("from builder import"):
                     temp_f.write("# ")
 
-                if line.startswith("def get_project_version() -> str:"):
-                    rewrite_get_project_version(temp_f)
+                if line.startswith("project_version = get_project_version()"):
+                    rewrite_project_version(temp_f)
                     ignore = True
 
                 if line.startswith("def load_packages_from_json"):
