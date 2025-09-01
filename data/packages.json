@@ -36,6 +36,18 @@
     },
     {
         "package_manager": "Winget",
+        "name": "Java x32",
+        "package_name": [
+            "--Force",
+            "Oracle.JavaRuntimeEnvironment",
+            "--version",
+            "8.0.4610.11",
+            "-a",
+            "x86"
+        ]
+    },
+    {
+        "package_manager": "Winget",
         "name": "Winrar",
         "package_name": [
             "WinRAR"
