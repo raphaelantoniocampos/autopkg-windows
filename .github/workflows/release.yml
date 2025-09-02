@@ -33,7 +33,7 @@ jobs:
     - name: Read version from pyproject.toml
       id: get_version
       run: |
-        echo "version=$(uv run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")" >> $GITHUB_ENV
+        echo "version=$(uv run python -c 'import toml; print(toml.load(\"pyproject.toml\")[\"project\"][\"version\"])')" >> $GITHUB_ENV
 
     - name: Install dependencies and Build executable
       run: |
