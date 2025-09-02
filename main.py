@@ -382,7 +382,9 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
         return packages
     else:
         lines = output.splitlines()
-        header_index = next(i for i, l in enumerate(lines) if "Nome" in l and "ID" in l)
+        header_index = next(
+            index for index, line in enumerate(lines) if "Nome" in line and "ID" in line
+        )
         data_lines = lines[header_index + 2 :]
 
         rows = []

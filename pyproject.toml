@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "inquirerpy>=0.3.4",
+    "numpy>=2.2.6",
     "pandas>=2.3.2",
     "pyproject-toml>=0.1.0",
     "rich>=13.9.4",

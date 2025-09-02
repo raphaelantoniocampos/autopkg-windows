@@ -16,3 +16,5 @@ wheels/
 temp.py
 autopkg.py
 data/silent-packages.json
+dist/auto*
+hooks/
