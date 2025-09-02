@@ -33,12 +33,12 @@ jobs:
     - name: Read version from pyproject.toml
       id: get_version
       run: |
-        echo "version=$(uv run python -c 'import toml; print(toml.load(\"pyproject.toml\")[\"project\"][\"version\"])')" >> $GITHUB_ENV
-
+        $version = uv run python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])"
+        echo "version=$version" >> $env:GITHUB_ENV
     - name: Install dependencies and Build executable
       run: |
         uv sync
-        uv run main.py -b data/packages.json
+        # uv run main.py -b data/packages.json
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
