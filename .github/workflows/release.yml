@@ -38,7 +38,7 @@ jobs:
     - name: Install dependencies and Build executable
       run: |
         uv sync
-        # uv run main.py -b data/packages.json
+        uv run main.py -b data/packages.json
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
