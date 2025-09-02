@@ -46,6 +46,6 @@ jobs:
           Triggered by: @${{ github.actor }}
           Reason: ${{ github.event.inputs.reason }}
         files: |
-          dist/autopkg-windows.exe
+          dist/autopkg-windows-v${{ steps.bump_version.outputs.NEW_VERSION }}.exe
         draft: false
         prerelease: false
