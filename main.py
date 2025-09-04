@@ -51,11 +51,8 @@ INQUIRER_KEYBINDINGS = {
 def main(json_path: str, silent: bool):
     """Main function"""
     os.chdir(os.path.expanduser("~"))
-    global PACKAGES
     try:
-        verify_winget()
-        packages = load_packages_from_json(json_path)
-        PACKAGES = check_installed_packages(packages)
+        ensure_winget(json_path)
         if silent:
             silent_mode()
         else:
@@ -203,18 +200,12 @@ class Package:
 CHOCOLATEY = PackageManager(
     name="Chocolatey",
     cli_install=["choco", "install", "-y"],
-    script=(
-        "[System.Net.ServicePointManager]::SecurityProtocol = 3072; "
-        "iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
-    ),
+    script="rm -r -force \"C:\\ProgramData\\chocolatey\"; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))",
 )
 SCOOP = PackageManager(
     name="Scoop",
     cli_install=["scoop", "install", "-y"],
-    script=(
-        "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser;"
-        "Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression"
-    ),
+    script="Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser; Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression",
 )
 WINGET = PackageManager(
     name="Winget",
@@ -354,7 +345,7 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
     """Updates installed packages list"""
 
     def check_package(package: Package, df) -> bool:
-        """Verifica se o pacote já está instalado (busca por Nome ou ID no DataFrame)."""
+        """Checks if package is already installed by Name or ID"""
         if package.package_manager == CUSTOM:
             return False
 
@@ -412,11 +403,14 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
         return packages
 
 
-def verify_winget() -> None:
+def ensure_winget(json_path: str) -> None:
     """Verify if winget is installed and installs it if not"""
-    if not WINGET.is_installed():
+    global PACKAGES
+    packages = load_packages_from_json(json_path)
+    try:
+        PACKAGES = check_installed_packages(packages)
+    except Exception:
         WINGET.install()
-    return
 
 
 def load_packages_from_json(json_path: str) -> List[Package]:
