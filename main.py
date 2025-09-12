@@ -218,7 +218,7 @@ WINGET = PackageManager(
         "--scope",
         "machine",
     ],
-    script="Install-Script winget-install -Force",
+    script="Install-Script winget-install -Force; winget-install",
 )
 
 CUSTOM = PackageManager(

@@ -24,7 +24,7 @@
         "package_manager": "Winget",
         "name": "Firefox",
         "package_name": [
-            "Mozilla Firefox"
+            "Mozilla.Firefox.pt-BR"
         ]
     },
     {
