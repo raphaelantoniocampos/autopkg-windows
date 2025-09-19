@@ -86,10 +86,12 @@ class PackageManager:
         name: str,
         cli_install: List[str],
         script: str,
+        check_script: str,
     ) -> None:
         self.name = name
         self.cli_install = cli_install
         self.script = script
+        self.check_script = check_script
 
     def is_installed(self) -> bool:
         """
@@ -99,9 +101,10 @@ class PackageManager:
         """
         try:
             result = subprocess.run(
-                f"{self.cli_install[0]} --version",
+                self.check_script,
                 shell=True,
                 check=False,
+                timeout=10,
             )
             if result.returncode == 0:
                 return True
@@ -123,6 +126,7 @@ class PackageManager:
                 self.script,
             ],
             shell=True,
+            check=False,
         )
 
         # Also update sources if package manager is winget
@@ -187,6 +191,7 @@ class Package:
         result = subprocess.run(
             self.cmd,
             shell=True,
+            check=False,
         )
         if result.returncode != 0 and result.stderr is not None:
             console.log(f"Return code{result.returncode}: {result.stderr}")
@@ -201,11 +206,13 @@ CHOCOLATEY = PackageManager(
     name="Chocolatey",
     cli_install=["choco", "install", "-y"],
     script="rm -r -force \"C:\\ProgramData\\chocolatey\"; Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))",
+    check_script=["choco", "--version"],
 )
 SCOOP = PackageManager(
     name="Scoop",
     cli_install=["scoop", "install", "-y"],
     script="Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser; Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression",
+    check_script=["scoop", "--version"],
 )
 WINGET = PackageManager(
     name="Winget",
@@ -218,13 +225,15 @@ WINGET = PackageManager(
         "--scope",
         "machine",
     ],
-    script="Install-Script winget-install -Force; winget-install",
+    script="Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser; Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Confirm:$false; Install-Script winget-install -Force; winget-install",
+    check_script=["winget", "source", "reset;", "winget", "source", "update"],
 )
 
 CUSTOM = PackageManager(
     name="Custom",
     cli_install=[],
     script="",
+    check_script="",
 )
 
 # --- Functions ---
@@ -364,7 +373,8 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
         output = subprocess.check_output(
             ["winget", "list", "--accept-source-agreements"],
             text=True,
-            stderr=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+            shell=True,
         )
     except (FileNotFoundError, subprocess.CalledProcessError, UnicodeDecodeError):
         console.log(
