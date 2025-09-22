@@ -160,7 +160,6 @@ class Package:
         self.cmd: Union[str, List[str]] = self._normalize_cmd(
             self.package_manager.cli_install + [*package_name]
         )
-        self.is_installed: bool = False
 
     def _normalize_cmd(self, cmd: list[str]) -> Union[str, list[str]]:
         """Treat backslashes in json, in case there are paths with \\"""
@@ -273,8 +272,7 @@ def silent_mode():
     try:
         console.log("Instalando pacotes...")
         for package in PACKAGES:
-            if not package.is_installed:
-                package.install()
+            package.install()
 
     except Exception as e:
         console.log(f"Erro no modo silencioso: {str(e)}")
@@ -285,19 +283,14 @@ def silent_mode():
 
 def interactive_mode():
     """Interactive execution mode"""
-    installed = sum(1 for package in PACKAGES if package.is_installed)
     choices = [
         *[
-            f"{'✅ ' if package.is_installed else ''}{package.name}"
+            package.name
             for package in PACKAGES
             if package.package_manager is not CUSTOM
         ],
         Separator(),
-        *[
-            f"{'✅ ' if package.is_installed else ''}{package.name}"
-            for package in PACKAGES
-            if package.package_manager is CUSTOM
-        ],
+        *[package.name for package in PACKAGES if package.package_manager is CUSTOM],
     ]
 
     console.print(
@@ -306,15 +299,8 @@ def interactive_mode():
             subtitle="[green]github.com/raphaelantoniocampos/autopkg-windows[/green]",
         )
     )
+    console.print()
 
-    console.print("")
-    console.print(
-        Panel.fit(
-            f"✅ {installed} programas instalados\n",
-            title="[bold]Status do Sistema[/bold]",
-        )
-    )
-    console.print("")
     selected_names = inquirer.checkbox(
         message="Selecione os programas que deseja instalar ou atualizar:",
         choices=choices,
@@ -348,6 +334,13 @@ def interactive_mode():
         console.log("[bold yellow]Nenhum programa foi selecionado![/bold yellow]")
     input("\nPressione Enter para sair...")
     return 0
+
+
+def check_winget() -> bool:
+    result = subprocess.run(["winget", "source", "update"])
+    if result.returncode != 0:
+        return False
+    return True
 
 
 def check_installed_packages(packages: List[Package]) -> List[Package]:
@@ -416,10 +409,8 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
 def ensure_winget(json_path: str) -> None:
     """Verify if winget is installed and installs it if not"""
     global PACKAGES
-    packages = load_packages_from_json(json_path)
-    try:
-        PACKAGES = check_installed_packages(packages)
-    except Exception:
+    PACKAGES = load_packages_from_json(json_path)
+    if not check_winget():
         WINGET.install()
 
 
