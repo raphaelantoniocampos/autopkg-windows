@@ -132,7 +132,7 @@ class PackageManager:
         # Also update sources if package manager is winget
         if self.name == "Winget":
             subprocess.run(
-                ["winget", "source", "update", "--force"],
+                ["winget", "source", "update"],
                 shell=True,
                 check=False,
             )
@@ -224,8 +224,11 @@ WINGET = PackageManager(
         "--scope",
         "machine",
     ],
-    script="Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser; Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Confirm:$false; Install-Script winget-install -Force; winget-install",
-    check_script=["winget", "source", "reset;", "winget", "source", "update"],
+    script="Import-Module PowerShellGet; Install-Script winget-install -Force; winget-install -Force",
+    check_script=[
+        "winget",
+        "--version",
+    ],
 )
 
 CUSTOM = PackageManager(
@@ -337,10 +340,13 @@ def interactive_mode():
 
 
 def check_winget() -> bool:
-    result = subprocess.run(["winget", "source", "update"])
-    if result.returncode != 0:
+    try:
+        result = subprocess.run(["winget", "source", "reset", "--force"], timeout=10)
+        if result.returncode != 0:
+            return False
+        return True
+    except Exception:
         return False
-    return True
 
 
 def check_installed_packages(packages: List[Package]) -> List[Package]:
