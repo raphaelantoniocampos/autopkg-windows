@@ -8,6 +8,13 @@
     },
     {
         "package_manager": "Winget",
+        "name": "RustDesk",
+        "package_name": [
+            "RustDesk.RustDesk"
+        ]
+    },
+    {
+        "package_manager": "Winget",
         "name": "Google Chrome",
         "package_name": [
             "Google.Chrome"

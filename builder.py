@@ -58,12 +58,12 @@ project_version = "{PROJECT_VERSION}"
 """)
 
 
-def build_exe(json_path: str, silent: bool, hide_console: bool = False):
+def build_exe(json_str: str, silent: bool, hide_console: bool = False):
     import subprocess
 
     original_script = Path("./main.py")
     temp_script = Path("./autopkg.py")
-    json_path = Path(json_path)
+    json_path: Path = Path(json_str)
 
     with open(original_script, "r", encoding="utf-8") as original_f:
         original_lines = original_f.read().split("\n")
@@ -113,7 +113,7 @@ def build_exe(json_path: str, silent: bool, hide_console: bool = False):
     if silent:
         name += "-silent"
     name += f"-v{PROJECT_VERSION}"
-    hide_console = "autopkg.py" if not hide_console else "--hide-console=hide-early"
+    console: str = "autopkg.py" if not hide_console else "--hide-console=hide-early"
 
     # numpy/pandas hook
     hooks_dir = Path("./hooks")
@@ -144,7 +144,7 @@ def build_exe(json_path: str, silent: bool, hide_console: bool = False):
             "--hidden-import=pandas._libs.interval",
             f"--icon={ico_path}",
             f"-n={name}",
-            hide_console,
+            console,
             "autopkg.py",
         ]
     )

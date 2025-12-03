@@ -86,7 +86,7 @@ class PackageManager:
         name: str,
         cli_install: List[str],
         script: str,
-        check_script: str,
+        check_script,
     ) -> None:
         self.name = name
         self.cli_install = cli_install
@@ -110,6 +110,7 @@ class PackageManager:
                 return True
         except Exception:
             return False
+        return False
 
     def install(self) -> None:
         """Installs the Package Manager using the powerShell script"""
@@ -157,6 +158,7 @@ class Package:
         self.name = name
         self.package_name = package_name
         self.package_manager = self._get_package_manager(package_manager)
+        self.is_installed: bool
         self.cmd: Union[str, List[str]] = self._normalize_cmd(
             self.package_manager.cli_install + [*package_name]
         )
@@ -494,7 +496,7 @@ if __name__ == "__main__":
     silent = "silent" in options
     build = "build" in options
     if build:
-        build_exe(json_path=json_path, silent=silent)
+        build_exe(json_str=json_path, silent=silent)
         exit(0)
 
     console = Console()
