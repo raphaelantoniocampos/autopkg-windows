@@ -188,7 +188,8 @@ class Package:
 
     def install(self) -> None:
         """Install the package using its package manager"""
-        console.log(f'[bold]Instalação/Comando "{self.name}" iniciado...[/bold]')
+        console.log(
+            f'[bold]Instalação/Comando "{self.name}" iniciado...[/bold]')
         result = subprocess.run(
             self.cmd,
             shell=True,
@@ -197,7 +198,8 @@ class Package:
         if result.returncode != 0 and result.stderr is not None:
             console.log(f"Return code{result.returncode}: {result.stderr}")
             return
-        console.log(f'[bold]Instalação/Comando "{self.name}" finalizado![/bold]')
+        console.log(
+            f'[bold]Instalação/Comando "{self.name}" finalizado![/bold]')
 
 
 # --- Managers Instances ---
@@ -296,14 +298,21 @@ def interactive_mode():
         ],
         Separator(),
         *[package.name for package in PACKAGES if package.package_manager is CUSTOM],
+        "Sair (Ctrl + C)"
     ]
 
-    console.print(
-        Panel.fit(
-            "[bold cyan]AutoPkg-Windows[/bold cyan] - [yellow]Ferramenta Automática de Pacotes Windows[/yellow]",
-            subtitle="[green]github.com/raphaelantoniocampos/autopkg-windows[/green]",
-        )
-    )
+    console.print(Panel.fit(r"""[bold cyan]
+   _         _          ___      _      __    __ _           _                   
+  /_\  _   _| |_ ___   / _ \__ _| | __ / / /\ \ (_)_ __   __| | _____      _____ 
+ //_\\| | | | __/ _ \ / /_)/ _` | |/ / \ \/  \/ / | '_ \ / _` |/ _ \ \ /\ / / __|
+/  _  \ |_| | || (_) / ___/ (_| |   <   \  /\  /| | | | | (_| | (_) \ V  V /\__ \
+\_/ \_/\__,_|\__\___/\/    \__, |_|\_\   \/  \/ |_|_| |_|\__,_|\___/ \_/\_/ |___/
+                           |___/                                                 
+[/bold cyan]
+                    [yellow]Ferramenta Automática de Pacotes Windows[/yellow]
+""", subtitle="[green]github.com/raphaelantoniocampos/autopkg-windows[/green]",
+                            ),)
+
     console.print()
 
     selected_names = inquirer.checkbox(
@@ -317,8 +326,11 @@ def interactive_mode():
         } • MIT License • © 2025 Raphael Campos",
     ).execute()
 
+    if "Sair" in selected_names:
+        raise KeyboardInterrupt
     if selected_names:
-        selected_names = [name[2:] if "✅" in name else name for name in selected_names]
+        selected_names = [
+            name[2:] if "✅" in name else name for name in selected_names]
         selected_packages = [
             package for package in PACKAGES if package.name in selected_names
         ]
@@ -336,14 +348,16 @@ def interactive_mode():
         else:
             console.log("[bold yellow]Operação cancelada![/bold yellow]")
     else:
-        console.log("[bold yellow]Nenhum programa foi selecionado![/bold yellow]")
+        console.log(
+            "[bold yellow]Nenhum programa foi selecionado![/bold yellow]")
     input("\nPressione Enter para sair...")
     return 0
 
 
 def check_winget() -> bool:
     try:
-        result = subprocess.run(["winget", "source", "reset", "--force"], timeout=10)
+        result = subprocess.run(
+            ["winget", "source", "reset", "--force"], timeout=10)
         if result.returncode != 0:
             return False
         return True
@@ -387,7 +401,7 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
         header_index = next(
             index for index, line in enumerate(lines) if "Nome" in line and "ID" in line
         )
-        data_lines = lines[header_index + 2 :]
+        data_lines = lines[header_index + 2:]
 
         rows = []
         for line in data_lines:
@@ -407,7 +421,8 @@ def check_installed_packages(packages: List[Package]) -> List[Package]:
         df = pd.DataFrame(
             rows, columns=["Nome", "ID", "Versão", "Disponível", "Origem"]
         )
-        df = df.map(lambda x: x.replace("â€¦", "") if isinstance(x, str) else x)
+        df = df.map(lambda x: x.replace("â€¦", "")
+                    if isinstance(x, str) else x)
 
         for package in packages:
             package.is_installed = check_package(package, df)
