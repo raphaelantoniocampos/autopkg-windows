@@ -1,6 +1,13 @@
 [
     {
         "package_manager": "Winget",
+        "name": "CPU-Z",
+        "package_name": [
+            "CPUID.CPU-Z"
+        ]
+    },
+    {
+        "package_manager": "Winget",
         "name": "Anydesk",
         "package_name": [
             "Anydesk"
