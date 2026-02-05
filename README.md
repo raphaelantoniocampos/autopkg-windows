@@ -2,6 +2,8 @@
 
 > 🚀 Simplify program installation on Windows using Winget, Chocolatey, or Scoop
 
+![executable](./assets/tui.png) 
+
 ---
 
 ## Features
@@ -135,3 +137,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 For more details, see the [LICENSE](LICENSE) file.
+
