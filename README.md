@@ -1,8 +1,34 @@
 # AutoPkg-Windows
 
+> [!IMPORTANT]
+> **This project has been superseded by [wgtui](https://github.com/raphaelantoniocampos/wgtui).**
+> AutoPkg-Windows is no longer actively developed. New features and fixes go to wgtui.
+
 > 🚀 Simplify program installation on Windows using Winget, Chocolatey, or Scoop
 
 ![executable](./assets/tui.png) 
+
+---
+
+## wgtui: the new version
+
+[wgtui](https://github.com/raphaelantoniocampos/wgtui) (**w**in**g**et **TUI**) is the next version of AutoPkg-Windows, rewritten in Rust. Here's what changed:
+
+- **Winget only**: Chocolatey and Scoop support has been dropped.
+- **Full package management**: search, install, upgrade and remove packages from a keyboard-driven terminal UI, in addition to provisioning a machine from a JSON manifest.
+- **Non-blocking UI** with a command queue, a built-in Windows Update action and automatic self-updates.
+- **No Python or uv needed**: ships as a single `wgtui.exe`.
+
+Install it from PowerShell (no Administrator required):
+
+```powershell
+irm https://raw.githubusercontent.com/raphaelantoniocampos/wgtui/main/install.ps1 | iex
+```
+
+> [!NOTE]
+> wgtui uses a different manifest format (`{ "packages": [...], "scripts": [...] }`). AutoPkg-Windows JSON files are not read directly, so convert them first. See the [wgtui manifest docs](https://github.com/raphaelantoniocampos/wgtui#manifesto-aba-appsscripts).
+
+The rest of this README covers the legacy AutoPkg-Windows.
 
 ---
 
