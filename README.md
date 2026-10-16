@@ -1,23 +1,17 @@
 # AutoPkg-Windows
 
 > [!IMPORTANT]
-> **This project has been superseded by [wgtui](https://github.com/raphaelantoniocampos/wgtui).**
-> AutoPkg-Windows is no longer actively developed. New features and fixes go to wgtui.
-
-> 🚀 Simplify program installation on Windows using Winget, Chocolatey, or Scoop
-
-![executable](./assets/tui.png) 
-
----
+> This project has been superseded by [wgtui] and is no longer actively developed.
 
 ## wgtui: the new version
 
-[wgtui](https://github.com/raphaelantoniocampos/wgtui) (**w**in**g**et **TUI**) is the next version of AutoPkg-Windows, rewritten in Rust. Here's what changed:
+[wgtui] (winget TUI) is a Rust rewrite of AutoPkg-Windows. What changed:
 
 - **Winget only**: Chocolatey and Scoop support has been dropped.
 - **Full package management**: search, install, upgrade and remove packages from a keyboard-driven terminal UI, in addition to provisioning a machine from a JSON manifest.
 - **Non-blocking UI** with a command queue, a built-in Windows Update action and automatic self-updates.
 - **No Python or uv needed**: ships as a single `wgtui.exe`.
+- **New manifest format**: AutoPkg-Windows JSON files must be converted first. See the [wgtui manifest docs](https://github.com/raphaelantoniocampos/wgtui#manifesto-aba-appsscripts).
 
 Install it from PowerShell (no Administrator required):
 
@@ -25,14 +19,15 @@ Install it from PowerShell (no Administrator required):
 irm https://raw.githubusercontent.com/raphaelantoniocampos/wgtui/main/install.ps1 | iex
 ```
 
-> [!NOTE]
-> wgtui uses a different manifest format (`{ "packages": [...], "scripts": [...] }`). AutoPkg-Windows JSON files are not read directly, so convert them first. See the [wgtui manifest docs](https://github.com/raphaelantoniocampos/wgtui#manifesto-aba-appsscripts).
-
-The rest of this README covers the legacy AutoPkg-Windows.
-
 ---
 
-## Features
+## Legacy AutoPkg-Windows
+
+> 🚀 Simplify program installation on Windows using Winget, Chocolatey, or Scoop
+
+![executable](./assets/tui.png) 
+
+### Features
 
 - **Automatic Dependency Management**:
   - Installs Package Managers if it is not already installed.
@@ -44,7 +39,7 @@ The rest of this README covers the legacy AutoPkg-Windows.
 
 ---
 
-## Prerequisites 
+### Prerequisites 
 
 - **Operating System**: Windows (PowerShell required)
 - **Privileges**: Administrator access
@@ -53,20 +48,20 @@ The rest of this README covers the legacy AutoPkg-Windows.
 
 ---
 
-## Usage
+### Usage
 
-### Clone the Repository:
+#### Clone the Repository:
 
 ```
 git clone https://github.com/raphaelantoniocampos/autopkg-windows
 cd autopkg-windows
 ```
 
-### Install uv if already not installed
+#### Install uv if already not installed
 
 To install uv follow the [instructions](https://docs.astral.sh/uv/getting-started/installation). 
 
-### Prepare the JSON file
+#### Prepare the JSON file
 
 - The data directory already includes an example JSON file for you to use:
 
@@ -102,7 +97,7 @@ To install uv follow the [instructions](https://docs.astral.sh/uv/getting-starte
 ```
 
 
-### Run the Script
+#### Run the Script
 
 - Run the script by passing the JSON file path as an argument:
 
@@ -110,7 +105,7 @@ To install uv follow the [instructions](https://docs.astral.sh/uv/getting-starte
 uv run .\main.py .\data\packages.json
 ```
 
-### Run in silent mode
+#### Run in silent mode
 
 - If you want to run the script in silent mode use *--silent*. (Runs installations without user interaction):
 
@@ -121,7 +116,7 @@ uv run .\main.py --silent .\data\packages.json
 
 ---
 
-### Generate an Executable (Optional)
+#### Generate an Executable (Optional)
 
 - To create a standalone executable, use the build flag:
 
@@ -141,7 +136,7 @@ uv run .\main.py --silent --build .\data\packages.json
 
 ---
 
-## Dependencies
+### Dependencies
 
 The project uses the following Python libraries:
 
@@ -154,7 +149,7 @@ The project uses the following Python libraries:
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
+AutoPkg-Windows no longer takes contributions. Please open issues and pull requests on [wgtui] instead.
 
 ---
 
@@ -163,4 +158,6 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 For more details, see the [LICENSE](LICENSE) file.
+
+[wgtui]: https://github.com/raphaelantoniocampos/wgtui
 
